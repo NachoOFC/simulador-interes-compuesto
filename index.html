@@ -50,6 +50,31 @@
             font-size: 15px;
         }
         .highlight { font-weight: bold; color: #28a745; }
+        .error { color: #d9534f; font-weight: bold; }
+        .tabla-wrapper {
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        .tabla-wrapper table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .tabla-wrapper th, .tabla-wrapper td {
+            padding: 8px;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+        }
+        .tabla-wrapper th {
+            position: sticky;
+            top: 0;
+            background: #007bff;
+            color: white;
+        }
+        .tabla-wrapper td:first-child, .tabla-wrapper th:first-child { text-align: center; }
     </style>
 </head>
 <body>
@@ -59,14 +84,14 @@
     
     <div class="form-group">
         <label for="monto">Monto Inicial ($):</label>
-        <input type="number" id="monto" value="1000000" placeholder="Ej. 1000000">
+        <input type="text" id="monto" inputmode="numeric" value="1.000.000" placeholder="Ej. 1.000.000" oninput="formatearMonto()">
     </div>
 
     <div class="form-group">
         <label for="institucion">Selecciona Institución:</label>
         <select id="institucion" onchange="actualizarTasa()">
             <option value="5.0">Mercado Pago (5.0% anual)</option>
-            <option value="4.6">MACH BCI (4.6% anual)</option>
+            <option value="4.6">MACH (Cuenta Futuro) (4.6% anual)</option>
             <option value="personalizado">Otra (Tasa personalizada)</option>
         </select>
     </div>
@@ -88,6 +113,22 @@
         <p>Total Ganado: <span class="highlight" id="total-ganado">$0</span></p>
         <p>Ganancia último día: <span class="highlight" id="ultimo-dia">$0</span></p>
     </div>
+
+    <div class="result" id="tabla-dias" style="display: none;">
+        <p><strong>Evolución diaria:</strong></p>
+        <div class="tabla-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Día</th>
+                        <th>Interés del día</th>
+                        <th>Saldo acumulado</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpo-tabla"></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -101,8 +142,14 @@
         }
     }
 
+    function formatearMonto() {
+        const input = document.getElementById('monto');
+        let valor = input.value.replace(/\./g, '').replace(/[^\d]/g, '');
+        input.value = valor ? Number(valor).toLocaleString('es-CL') : '';
+    }
+
     function calcularInteres() {
-        const montoInicial = parseFloat(document.getElementById('monto').value);
+        const montoInicial = parseFloat(document.getElementById('monto').value.replace(/\./g, '').replace(/,/g, '.'));
         const dias = parseInt(document.getElementById('dias').value);
         
         let tasaAnualInput = document.getElementById('institucion').value;
@@ -118,14 +165,31 @@
             return;
         }
 
+        if (montoInicial <= 0) {
+            alert("El monto inicial debe ser un valor mayor a cero.");
+            return;
+        }
+
+        if (dias <= 0) {
+            alert("El plazo en días debe ser un valor mayor a cero.");
+            return;
+        }
+
         // Lógica del crecimiento exponencial día por día
         let montoActual = montoInicial;
         let gananciaUltimoDia = 0;
+        const evolucionDiaria = [];
 
         for (let i = 1; i <= dias; i++) {
             let interesDelDia = montoActual * tasaDiaria;
             montoActual += interesDelDia;
-            
+
+            evolucionDiaria.push({
+                dia: i,
+                interes: interesDelDia,
+                saldo: montoActual
+            });
+
             if (i === dias) {
                 gananciaUltimoDia = interesDelDia;
             }
@@ -138,6 +202,19 @@
         document.getElementById('total-ganado').innerText = formatter.format(totalGanado);
         document.getElementById('ultimo-dia').innerText = formatter.format(gananciaUltimoDia);
         document.getElementById('resultado').style.display = 'block';
+
+        // Tabla de evolución diaria
+        const cuerpo = document.getElementById('cuerpo-tabla');
+        cuerpo.innerHTML = '';
+        evolucionDiaria.forEach(d => {
+            const fila = document.createElement('tr');
+            fila.innerHTML =
+                '<td>' + d.dia + '</td>' +
+                '<td>' + formatter.format(d.interes) + '</td>' +
+                '<td>' + formatter.format(d.saldo) + '</td>';
+            cuerpo.appendChild(fila);
+        });
+        document.getElementById('tabla-dias').style.display = 'block';
     }
 
     // Formateador de moneda para Chile (CLP)
