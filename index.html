@@ -5,22 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Interés Compuesto Diario</title>
     <style>
+        * { box-sizing: border-box; }
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f7f6;
+            margin: 0;
             padding: 20px;
             display: flex;
             justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
         }
         .container {
             background: white;
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            max-width: 400px;
             width: 100%;
+            max-width: 1000px;
         }
-        h2 { text-align: center; color: #333; }
+        h2 { text-align: center; color: #333; margin-top: 0; }
+        .layout {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 30px;
+        }
+        .panel-form { padding-right: 30px; border-right: 1px solid #e0e0e0; }
+        .panel-resultados { min-width: 0; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
         input, select {
@@ -43,7 +54,7 @@
         }
         button:hover { background-color: #0056b3; }
         .result {
-            margin-top: 25px;
+            margin-top: 20px;
             padding: 15px;
             background-color: #e9ecef;
             border-radius: 6px;
@@ -51,6 +62,14 @@
         }
         .highlight { font-weight: bold; color: #28a745; }
         .error { color: #d9534f; font-weight: bold; }
+        .grafico-wrapper { margin-top: 20px; }
+        .grafico-wrapper svg {
+            width: 100%;
+            height: auto;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+        }
         .tabla-wrapper {
             margin-top: 15px;
             max-height: 300px;
@@ -75,58 +94,91 @@
             color: white;
         }
         .tabla-wrapper td:first-child, .tabla-wrapper th:first-child { text-align: center; }
+
+        .grid-resumen {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .grid-resumen .result { margin-top: 0; text-align: center; }
+        .grid-resumen .highlight { font-size: 18px; }
+
+        @media (max-width: 768px) {
+            .layout { grid-template-columns: 1fr; gap: 20px; }
+            .panel-form { padding-right: 0; border-right: none; }
+            .grid-resumen { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>📈 Calculadora Diario</h2>
-    
-    <div class="form-group">
-        <label for="monto">Monto Inicial ($):</label>
-        <input type="text" id="monto" inputmode="numeric" value="1.000.000" placeholder="Ej. 1.000.000" oninput="formatearMonto()">
-    </div>
 
-    <div class="form-group">
-        <label for="institucion">Selecciona Institución:</label>
-        <select id="institucion" onchange="actualizarTasa()">
-            <option value="5.0">Mercado Pago (5.0% anual)</option>
-            <option value="4.6">MACH (Cuenta Futuro) (4.6% anual)</option>
-            <option value="personalizado">Otra (Tasa personalizada)</option>
-        </select>
-    </div>
+    <div class="layout">
+        <div class="panel-form">
+            <div class="form-group">
+                <label for="monto">Monto Inicial ($):</label>
+                <input type="text" id="monto" inputmode="numeric" value="1.000.000" placeholder="Ej. 1.000.000" oninput="formatearMonto()">
+            </div>
 
-    <div class="form-group" id="grupo-tasa-manual" style="display: none;">
-        <label for="tasa">Tasa Anual (%):</label>
-        <input type="number" id="tasa" step="0.1" value="5.0">
-    </div>
+            <div class="form-group">
+                <label for="institucion">Selecciona Institución:</label>
+                <select id="institucion" onchange="actualizarTasa()">
+                    <option value="5.0">Mercado Pago (5.0% anual)</option>
+                    <option value="4.6">MACH (Cuenta Futuro) (4.6% anual)</option>
+                    <option value="personalizado">Otra (Tasa personalizada)</option>
+                </select>
+            </div>
 
-    <div class="form-group">
-        <label for="dias">Plazo en días:</label>
-        <input type="number" id="dias" value="30" placeholder="Ej. 30">
-    </div>
+            <div class="form-group" id="grupo-tasa-manual" style="display: none;">
+                <label for="tasa">Tasa Anual (%):</label>
+                <input type="number" id="tasa" step="0.1" value="5.0">
+            </div>
 
-    <button onclick="calcularInteres()">Calcular Ganancia</button>
+            <div class="form-group">
+                <label for="dias">Plazo en días:</label>
+                <input type="number" id="dias" value="30" placeholder="Ej. 30">
+            </div>
 
-    <div class="result" id="resultado" style="display: none;">
-        <p>Monto Final: <span class="highlight" id="monto-final">$0</span></p>
-        <p>Total Ganado: <span class="highlight" id="total-ganado">$0</span></p>
-        <p>Ganancia último día: <span class="highlight" id="ultimo-dia">$0</span></p>
-    </div>
+            <button onclick="calcularInteres()">Calcular Ganancia</button>
+        </div>
 
-    <div class="result" id="tabla-dias" style="display: none;">
-        <p><strong>Evolución diaria:</strong></p>
-        <div class="tabla-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Día</th>
-                        <th>Interés del día</th>
-                        <th>Saldo acumulado</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpo-tabla"></tbody>
-            </table>
+        <div class="panel-resultados">
+            <div class="grid-resumen" id="resultado" style="display: none;">
+                <div class="result">
+                    <p>Monto Final</p>
+                    <p class="highlight" id="monto-final">$0</p>
+                </div>
+                <div class="result">
+                    <p>Total Ganado</p>
+                    <p class="highlight" id="total-ganado">$0</p>
+                </div>
+                <div class="result">
+                    <p>Ganancia último día</p>
+                    <p class="highlight" id="ultimo-dia">$0</p>
+                </div>
+            </div>
+
+            <div class="grafico-wrapper" id="grafico" style="display: none;">
+                <svg id="grafico-svg" viewBox="0 0 600 300"></svg>
+            </div>
+
+            <div class="result" id="tabla-dias" style="display: none;">
+                <p><strong>Evolución diaria:</strong></p>
+                <div class="tabla-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Día</th>
+                                <th>Interés del día</th>
+                                <th>Saldo acumulado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpo-tabla"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -148,15 +200,80 @@
         input.value = valor ? Number(valor).toLocaleString('es-CL') : '';
     }
 
+    function dibujarGrafico(evolucion, montoInicial) {
+        const svg = document.getElementById('grafico-svg');
+        const W = 600, H = 300;
+        const margen = { top: 20, right: 20, bottom: 35, left: 60 };
+        const ancho = W - margen.left - margen.right;
+        const alto = H - margen.top - margen.bottom;
+
+        const dias = evolucion.length;
+        const maxSaldo = evolucion[dias - 1].saldo;
+        const minSaldo = montoInicial;
+
+        const x = i => margen.left + (i / dias) * ancho;
+        const rango = (maxSaldo - minSaldo) || 1;
+        const y = valor => margen.top + alto - ((valor - minSaldo) / rango) * alto;
+
+        let html = '';
+        html += '<line x1="' + margen.left + '" y1="' + margen.top + '" x2="' + margen.left + '" y2="' + (margen.top + alto) + '" stroke="#ccc" />';
+        html += '<line x1="' + margen.left + '" y1="' + (margen.top + alto) + '" x2="' + (margen.left + ancho) + '" y2="' + (margen.top + alto) + '" stroke="#ccc" />';
+
+        // Etiquetas de saldo (ejes)
+        const pasos = 5;
+        for (let i = 0; i <= pasos; i++) {
+            const valor = minSaldo + ((maxSaldo - minSaldo) * i / pasos);
+            const yy = y(valor);
+            html += '<text x="' + (margen.left - 8) + '" y="' + (yy + 4) + '" font-size="11" fill="#666" text-anchor="end">' +
+                compacto(valor) + '</text>';
+            html += '<line x1="' + margen.left + '" y1="' + yy + '" x2="' + (margen.left + ancho) + '" y2="' + yy + '" stroke="#eee" stroke-dasharray="3,3" />';
+        }
+
+        // Etiquetas de días
+        for (let i = 0; i <= pasos; i++) {
+            const dia = Math.round(i * dias / pasos);
+            const xx = x(dia);
+            html += '<text x="' + xx + '" y="' + (margen.top + alto + 18) + '" font-size="11" fill="#666" text-anchor="middle">Día ' + dia + '</text>';
+        }
+
+        // Línea de crecimiento
+        let puntos = '';
+        evolucion.forEach((d, i) => {
+            puntos += (i === 0 ? 'M' : 'L') + x(i).toFixed(2) + ',' + y(d.saldo).toFixed(2) + ' ';
+        });
+        html += '<path d="' + puntos + '" fill="none" stroke="#28a745" stroke-width="2.5" />';
+
+        // Área bajo la curva
+        let area = 'M' + x(0).toFixed(2) + ',' + (margen.top + alto) + ' ';
+        evolucion.forEach((d, i) => {
+            area += 'L' + x(i).toFixed(2) + ',' + y(d.saldo).toFixed(2) + ' ';
+        });
+        area += 'L' + x(dias).toFixed(2) + ',' + (margen.top + alto) + ' Z';
+        html += '<path d="' + area + '" fill="#28a745" opacity="0.15" />';
+
+        // Punto inicial y final
+        html += '<circle cx="' + x(0).toFixed(2) + '" cy="' + y(minSaldo).toFixed(2) + '" r="4" fill="#007bff" />';
+        html += '<circle cx="' + x(dias).toFixed(2) + '" cy="' + y(maxSaldo).toFixed(2) + '" r="4" fill="#28a745" />';
+
+        svg.innerHTML = html;
+        document.getElementById('grafico').style.display = 'block';
+    }
+
+    function compacto(valor) {
+        if (valor >= 1000000) return (valor / 1000000).toFixed(1) + 'M';
+        if (valor >= 1000) return (valor / 1000).toFixed(0) + 'K';
+        return Math.round(valor).toString();
+    }
+
     function calcularInteres() {
         const montoInicial = parseFloat(document.getElementById('monto').value.replace(/\./g, '').replace(/,/g, '.'));
         const dias = parseInt(document.getElementById('dias').value);
-        
+
         let tasaAnualInput = document.getElementById('institucion').value;
         if (tasaAnualInput === 'personalizado') {
             tasaAnualInput = document.getElementById('tasa').value;
         }
-        
+
         const tasaAnual = parseFloat(tasaAnualInput) / 100;
         const tasaDiaria = tasaAnual / 365;
 
@@ -201,7 +318,10 @@
         document.getElementById('monto-final').innerText = formatter.format(montoActual);
         document.getElementById('total-ganado').innerText = formatter.format(totalGanado);
         document.getElementById('ultimo-dia').innerText = formatter.format(gananciaUltimoDia);
-        document.getElementById('resultado').style.display = 'block';
+        document.getElementById('resultado').style.display = 'grid';
+
+        // Gráfico de crecimiento exponencial
+        dibujarGrafico(evolucionDiaria, montoInicial);
 
         // Tabla de evolución diaria
         const cuerpo = document.getElementById('cuerpo-tabla');
