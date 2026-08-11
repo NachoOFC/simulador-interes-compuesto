@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Interés Compuesto Diario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        h2 { text-align: center; color: #333; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover { background-color: #0056b3; }
+        .result {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+        .highlight { font-weight: bold; color: #28a745; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📈 Calculadora Diario</h2>
+    
+    <div class="form-group">
+        <label for="monto">Monto Inicial ($):</label>
+        <input type="number" id="monto" value="1000000" placeholder="Ej. 1000000">
+    </div>
+
+    <div class="form-group">
+        <label for="institucion">Selecciona Institución:</label>
+        <select id="institucion" onchange="actualizarTasa()">
+            <option value="5.0">Mercado Pago (5.0% anual)</option>
+            <option value="4.6">MACH BCI (4.6% anual)</option>
+            <option value="personalizado">Otra (Tasa personalizada)</option>
+        </select>
+    </div>
+
+    <div class="form-group" id="grupo-tasa-manual" style="display: none;">
+        <label for="tasa">Tasa Anual (%):</label>
+        <input type="number" id="tasa" step="0.1" value="5.0">
+    </div>
+
+    <div class="form-group">
+        <label for="dias">Plazo en días:</label>
+        <input type="number" id="dias" value="30" placeholder="Ej. 30">
+    </div>
+
+    <button onclick="calcularInteres()">Calcular Ganancia</button>
+
+    <div class="result" id="resultado" style="display: none;">
+        <p>Monto Final: <span class="highlight" id="monto-final">$0</span></p>
+        <p>Total Ganado: <span class="highlight" id="total-ganado">$0</span></p>
+        <p>Ganancia último día: <span class="highlight" id="ultimo-dia">$0</span></p>
+    </div>
+</div>
+
+<script>
+    function actualizarTasa() {
+        const select = document.getElementById('institucion');
+        const grupoManual = document.getElementById('grupo-tasa-manual');
+        if (select.value === 'personalizado') {
+            grupoManual.style.display = 'block';
+        } else {
+            grupoManual.style.display = 'none';
+        }
+    }
+
+    function calcularInteres() {
+        const montoInicial = parseFloat(document.getElementById('monto').value);
+        const dias = parseInt(document.getElementById('dias').value);
+        
+        let tasaAnualInput = document.getElementById('institucion').value;
+        if (tasaAnualInput === 'personalizado') {
+            tasaAnualInput = document.getElementById('tasa').value;
+        }
+        
+        const tasaAnual = parseFloat(tasaAnualInput) / 100;
+        const tasaDiaria = tasaAnual / 365;
+
+        if (isNaN(montoInicial) || isNaN(dias) || isNaN(tasaAnual)) {
+            alert("Por favor, llena todos los campos correctamente.");
+            return;
+        }
+
+        // Lógica del crecimiento exponencial día por día
+        let montoActual = montoInicial;
+        let gananciaUltimoDia = 0;
+
+        for (let i = 1; i <= dias; i++) {
+            let interesDelDia = montoActual * tasaDiaria;
+            montoActual += interesDelDia;
+            
+            if (i === dias) {
+                gananciaUltimoDia = interesDelDia;
+            }
+        }
+
+        const totalGanado = montoActual - montoInicial;
+
+        // Mostrar resultados formateados en pesos chilenos
+        document.getElementById('monto-final').innerText = formatter.format(montoActual);
+        document.getElementById('total-ganado').innerText = formatter.format(totalGanado);
+        document.getElementById('ultimo-dia').innerText = formatter.format(gananciaUltimoDia);
+        document.getElementById('resultado').style.display = 'block';
+    }
+
+    // Formateador de moneda para Chile (CLP)
+    const formatter = new Intl.NumberFormat('es-CL', {
+        style: 'currency',
+        currency: 'CLP',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    });
+</script>
+
+</body>
+</html>
