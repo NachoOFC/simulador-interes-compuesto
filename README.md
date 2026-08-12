@@ -6,10 +6,12 @@ A diferencia de las calculadoras tradicionales que aplican un interes mensual o 
 
 ## Tasas de referencia actuales
 
-El archivo de configuracion mantiene los datos de rendimiento anual (TEA) de las opciones mas utilizadas en el mercado local:
+El archivo de configuración mantiene los datos de rendimiento anual (TEA) de las opciones más utilizadas en el mercado local:
 
-* Mercado Pago: 5.0% anual
-* MACH (Cuenta Futuro): 4.6% anual
+| Banco / Plataforma | Interés Anual (TEA) |
+| :--- | :--- |
+| Mercado Pago | 5.0% |
+| MACH (Cuenta Futuro) | 4.6% |
 
 ## Logica del calculo exponencial
 
