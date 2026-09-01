@@ -10,9 +10,9 @@ function actualizarTasa() {
     const select = document.getElementById('institucion');
     const grupoManual = document.getElementById('grupo-tasa-manual');
     if (select.value === 'personalizado') {
-        grupoManual.style.display = 'block';
+        grupoManual.classList.remove('oculto');
     } else {
-        grupoManual.style.display = 'none';
+        grupoManual.classList.add('oculto');
     }
 }
 
@@ -78,7 +78,7 @@ function dibujarGrafico(evolucion, montoInicial) {
     html += '<circle cx="' + x(dias).toFixed(2) + '" cy="' + y(maxSaldo).toFixed(2) + '" r="4" fill="#28a745" />';
 
     svg.innerHTML = html;
-    document.getElementById('grafico').style.display = 'block';
+    document.getElementById('grafico').classList.remove('oculto');
 }
 
 function compacto(valor) {
@@ -140,7 +140,7 @@ function calcularInteres() {
     document.getElementById('monto-final').innerText = formatter.format(montoActual);
     document.getElementById('total-ganado').innerText = formatter.format(totalGanado);
     document.getElementById('ultimo-dia').innerText = formatter.format(gananciaUltimoDia);
-    document.getElementById('resultado').style.display = 'grid';
+    document.getElementById('resultado').classList.remove('oculto');
 
     // Gráfico de crecimiento exponencial
     dibujarGrafico(evolucionDiaria, montoInicial);
@@ -156,5 +156,5 @@ function calcularInteres() {
             '<td>' + formatter.format(d.saldo) + '</td>';
         cuerpo.appendChild(fila);
     });
-    document.getElementById('tabla-dias').style.display = 'block';
+    document.getElementById('tabla-dias').classList.remove('oculto');
 }

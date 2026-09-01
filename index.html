@@ -27,7 +27,7 @@
                 </select>
             </div>
 
-            <div class="form-group" id="grupo-tasa-manual" style="display: none;">
+            <div class="form-group oculto" id="grupo-tasa-manual">
                 <label for="tasa">Tasa Anual (%):</label>
                 <input type="number" id="tasa" step="0.1" value="5.0">
             </div>
@@ -41,7 +41,7 @@
         </div>
 
         <div class="panel-resultados">
-            <div class="grid-resumen" id="resultado" style="display: none;">
+            <div class="grid-resumen oculto" id="resultado">
                 <div class="result">
                     <p>Monto Final</p>
                     <p class="highlight" id="monto-final">$0</p>
@@ -56,11 +56,11 @@
                 </div>
             </div>
 
-            <div class="grafico-wrapper" id="grafico" style="display: none;">
+            <div class="grafico-wrapper oculto" id="grafico">
                 <svg id="grafico-svg" viewBox="0 0 600 300"></svg>
             </div>
 
-            <div class="result" id="tabla-dias" style="display: none;">
+            <div class="result oculto" id="tabla-dias">
                 <p><strong>Evolución diaria:</strong></p>
                 <div class="tabla-wrapper">
                     <table>

@@ -1,4 +1,5 @@
 * { box-sizing: border-box; }
+.oculto { display: none; }
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f7f6;
