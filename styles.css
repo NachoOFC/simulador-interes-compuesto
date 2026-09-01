@@ -1,0 +1,104 @@
+* { box-sizing: border-box; }
+.oculto { display: none; }
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 1000px;
+}
+h2 { text-align: center; color: #333; margin-top: 0; }
+.layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 30px;
+}
+.panel-form { padding-right: 30px; border-right: 1px solid #e0e0e0; }
+.panel-resultados { min-width: 0; }
+.form-group { margin-bottom: 15px; }
+label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+input, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+button:hover { background-color: #0056b3; }
+.result {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #e9ecef;
+    border-radius: 6px;
+    font-size: 15px;
+}
+.highlight { font-weight: bold; color: #28a745; }
+.error { color: #d9534f; font-weight: bold; }
+.grafico-wrapper { margin-top: 20px; }
+.grafico-wrapper svg {
+    width: 100%;
+    height: auto;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+}
+.tabla-wrapper {
+    margin-top: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+.tabla-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+.tabla-wrapper th, .tabla-wrapper td {
+    padding: 8px;
+    text-align: right;
+    border-bottom: 1px solid #eee;
+}
+.tabla-wrapper th {
+    position: sticky;
+    top: 0;
+    background: #007bff;
+    color: white;
+}
+.tabla-wrapper td:first-child, .tabla-wrapper th:first-child { text-align: center; }
+
+.grid-resumen {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+.grid-resumen .result { margin-top: 0; text-align: center; }
+.grid-resumen .highlight { font-size: 18px; }
+
+@media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; gap: 20px; }
+    .panel-form { padding-right: 0; border-right: none; }
+    .grid-resumen { grid-template-columns: 1fr; }
+}
